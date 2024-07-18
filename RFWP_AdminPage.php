@@ -10,6 +10,7 @@ if (!class_exists('RFWP_AdminPage')) {
             $iconUrl = "";
 
             try {
+                require_once(ABSPATH . 'wp-admin/includes/file.php');
                 WP_Filesystem();
                 $filePath = plugin_dir_path( __FILE__ ).'assets/images/realbig_plugin_standart.svg';
                 if ( $wp_filesystem->exists( $filePath ) ) {

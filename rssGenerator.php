@@ -220,6 +220,9 @@ try {
 			    }
 		    }
 
+		    //преобразовываем галереи в турбо-галереи
+//		    add_shortcode('gallery', 'gallery_shortcode');
+//		    add_filter( 'post_gallery', 'RFWP_rss_turbo_gallery', 10, 2 );
 		    $content = RFWP_rss_do_gallery($content);
 		    if (!empty($rssOptions['toc'])) {
 			    $content = RFWP_rssTocAdd($content, $rssOptions, $postId);
@@ -228,6 +231,78 @@ try {
 		    return $content;
 	    }
     }
+	//функция преобразования стандартных галерей движка в турбо-галереи begin
+	/*if (!function_exists('RFWP_rss_turbo_gallery')) {
+		function RFWP_rss_turbo_gallery( $output, $attr ) {
+
+			$yturbo_options = get_option('yturbo_options');
+			if ( ! is_feed($yturbo_options['ytrssname']) ) {return;}
+
+			$post = get_post();
+
+			static $instance = 0;
+			$instance++;
+
+			if ( ! empty( $attr['ids'] ) ) {
+				// 'ids' is explicitly ordered, unless you specify otherwise.
+				if ( empty( $attr['orderby'] ) ) {
+					$attr['orderby'] = 'post__in';
+				}
+				$attr['include'] = $attr['ids'];
+			}
+
+			$html5 = current_theme_supports( 'html5', 'gallery' );
+			$atts = shortcode_atts( array(
+				'order'      => 'ASC',
+				'orderby'    => 'menu_order ID',
+				'id'         => $post ? $post->ID : 0,
+				'itemtag'    => $html5 ? 'figure'     : 'dl',
+				'icontag'    => $html5 ? 'div'        : 'dt',
+				'captiontag' => $html5 ? 'figcaption' : 'dd',
+				'columns'    => 3,
+				'size'       => 'thumbnail',
+				'include'    => '',
+				'exclude'    => '',
+				'link'       => ''
+			), $attr, 'gallery' );
+
+			$id = intval( $atts['id'] );
+
+			$atts['include'] = str_replace(array("&#187;","&#8243;"), "", $atts['include']);
+			$atts['orderby'] = str_replace(array("&#187;","&#8243;"), "", $atts['orderby']);
+			$atts['order'] = str_replace(array("&#187;","&#8243;"), "", $atts['order']);
+			$atts['exclude'] = str_replace(array("&#187;","&#8243;"), "", $atts['exclude']);
+
+            echo "exclude: " . json_encode($atts['exclude'], JSON_UNESCAPED_UNICODE);
+
+			if ( ! empty( $atts['include'] ) ) {
+				$_attachments = get_posts( array( 'include' => $atts['include'], 'post_status' => 'inherit', 'post_type' => 'attachment', 'post_mime_type' => 'image', 'order' => $atts['order'], 'orderby' => $atts['orderby'] ) );
+
+				$attachments = array();
+				foreach ( $_attachments as $key => $val ) {
+					$attachments[$val->ID] = $_attachments[$key];
+				}
+
+			} elseif ( ! empty( $atts['exclude'] ) ) {
+				$attachments = get_children( array( 'post_parent' => $id, 'post__not_in' => $atts['exclude'], 'post_status' => 'inherit', 'post_type' => 'attachment', 'post_mime_type' => 'image', 'order' => $atts['order'], 'orderby' => $atts['orderby'] ) );
+			} else {
+				$attachments = get_children( array( 'post_parent' => $id, 'post_status' => 'inherit', 'post_type' => 'attachment', 'post_mime_type' => 'image', 'order' => $atts['order'], 'orderby' => $atts['orderby'] ) );
+			}
+
+			if ( empty( $attachments ) ) {
+				return '';
+			}
+
+			$output = PHP_EOL.'<div data-block="gallery">'.PHP_EOL;
+
+			foreach ( $attachments as $id => $attachment ) {
+				$output .= '<img src="'.wp_get_attachment_url($id) . '"/>'.PHP_EOL;
+			}
+			$output .= '</div>'.PHP_EOL;
+
+			return $output;
+		}
+    }*/
     //функция преобразования стандартных галерей движка в турбо-галереи end
     //функция преобразования стандартных галерей движка в турбо-галереи в гутенберге begin
 	if (!function_exists('RFWP_rss_do_gallery')) {
@@ -613,6 +688,7 @@ try {
 						$rssDivided[$divideCurrent] = [];
 						$divideMax = $divideMax+intval($rssOptions['rssPartsSeparated']);
 					}
+//					array_push($rssDivided[$divideCurrent], $item->ID);
 					array_push($rssDivided[$divideCurrent], $item);
 					$divideCounter++;
 				}
@@ -1188,11 +1264,21 @@ try {
 
 			if (!in_array(get_post_type($post_id), $yttype)) {return;}
 
+//			$rfwp_selectiveOffField = [];
+//			$rfwp_selectiveOffFieldGet = get_option('rfwp_selectiveOffField');
+//			if (!empty($rfwp_selectiveOffFieldGet)) {
+//			    if (is_string($rfwp_selectiveOffFieldGet)) {
+//				    $rfwp_selectiveOffFieldGet = explode("\n", str_replace(array("\r\n", "\r"), "\n", $rfwp_selectiveOffFieldGet));
+//                }
+//			    $rfwp_selectiveOffField = $rfwp_selectiveOffFieldGet;
+//            }
+
 			$rfwp_selectiveOffFieldGet = RFWP_rssSelectiveOffFieldGet();
 			$rfwp_selectiveOffField = RFWP_rssSelectiveOffFieldToArray($rfwp_selectiveOffFieldGet);
 
 			$delpermalink = PHP_EOL . esc_url(apply_filters('the_permalink_rss', get_permalink($post_id)));
 			$delpermalink = trim($delpermalink);
+//			$delpermalink = str_replace(array("\r\n", "\r", "\n"), "", $delpermalink);
 			foreach ($rfwp_selectiveOffField as $k => $item) {
 				if (in_array($delpermalink, $rfwp_selectiveOffField[$k])) {
 					$neededKey = array_search($delpermalink, $rfwp_selectiveOffField[$k]);
@@ -1207,6 +1293,18 @@ try {
 				RFWP_rssSelectiveOffFieldOptionSave($rfwp_selectiveOffField[$k], $k);
 			}
 			unset($k, $item);
+
+//			$delpermalink = PHP_EOL . esc_url(apply_filters('the_permalink_rss', get_permalink($post_id)));
+//			if (!in_array($delpermalink, $rfwp_selectiveOffField)) {
+//			    array_push($rfwp_selectiveOffField, $delpermalink);
+//            }
+//			$rfwp_selectiveOffField = implode('\n', $rfwp_selectiveOffField);
+//			update_option('rfwp_selectiveOffField', $rfwp_selectiveOffField);
+//			$rssOptions['selectiveOffField'] .= $delpermalink;
+//			$lines                           = array_filter(explode("\n", trim($rssOptions['selectiveOffField'])));
+//			$rssOptions['selectiveOffField'] = implode("\n", $lines);
+//
+//			update_option('rb_TurboRssOptions', $rssOptions);
 		}
 	}
 	add_action('wp_trash_post', 'RFWP_rss_trash_tracking');
@@ -1298,6 +1396,12 @@ try {
 				RFWP_rssSelectiveOffFieldOptionSave($rfwp_selectiveOffField[$k], $k);
             }
 			unset($k, $item);
+
+//			$rssOptions['selectiveOffField'] = str_replace($restorepermalink, '', $rssOptions['selectiveOffField']);
+//			$lines                           = array_filter(explode("\n", trim($rssOptions['selectiveOffField'])));
+//			$rssOptions['selectiveOffField'] = implode("\n", $lines);
+//
+//			update_option('rb_TurboRssOptions', $rssOptions);
 		}
 	}
 	add_action('untrashed_post', 'RFWP_rss_untrash_tracking');
@@ -1504,6 +1608,7 @@ try {
 
             RFWP_Logs::saveLogs(RFWP_Logs::RSS_LOG, $messageFLog);
 
+//			if (isset($_GET['feed'])&&$_GET['feed']=='rb_turbo_trash_rss') {
 			if (isset($_GET['rb_rss_trash']) && $_GET['rb_rss_trash']=='1') {
 //				if (!empty($rssOptions['selectiveOff'])) {
 					RFWP_rss_lenta_trash($rssOptions);

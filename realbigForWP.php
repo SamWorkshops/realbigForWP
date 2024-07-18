@@ -5,7 +5,7 @@ if (!defined("ABSPATH")) { exit;}
 /*
 Plugin name:  Realbig Media Git version
 Description:  Плагин для монетизации от RealBig.media
-Version:      1.1.1.2
+Version:      1.1.2
 Author:       Realbig Team
 Author URI:   https://realbig.media
 License:      GPLv2 or later
@@ -39,7 +39,7 @@ try {
 	global $table_prefix;
 
 	if (!isset($GLOBALS['dev_mode'])) {
-		$devMode = false;
+        $devMode = false;
 		$GLOBALS['dev_mode'] = $devMode;
     }
 	if (!isset($GLOBALS['rb_testMode'])) {
@@ -51,7 +51,6 @@ try {
     if (!isset($GLOBALS['rb_localRotator'])) {
         $GLOBALS['rb_localRotator'] = true;
     }
-
 	include_once (plugin_dir_path(__FILE__).'rssGenerator.php');
 
 	if (function_exists('wp_cookie_constants')) {
@@ -123,6 +122,7 @@ try {
 	if (function_exists('RFWP_rssInit')) {
 		add_action('init', 'RFWP_rssInit');
     }
+
 	/** End of Rss init */
     /** Check in header inserting */
     if (!empty($curUserCan)&&!empty($devMode)&&function_exists('RFWP_checkHeader')) {

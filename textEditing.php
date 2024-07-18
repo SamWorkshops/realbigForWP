@@ -878,6 +878,7 @@ try {
 	}
 	if (!function_exists('RFWP_headerInsertor')) {
 		function RFWP_headerInsertor($patternType) {
+
 			try {
                 include_once(plugin_dir_path(__FILE__) . "RFWP_Variables.php");
 

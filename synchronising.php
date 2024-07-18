@@ -1048,6 +1048,7 @@ try {
     }
 	if (!function_exists('RFWP_createAndFillLocalRotator')) {
 		function RFWP_createAndFillLocalRotator($rotatorFileInfo) {
+            require_once(ABSPATH . 'wp-admin/includes/file.php');
             WP_Filesystem();
             global $wp_filesystem;
 

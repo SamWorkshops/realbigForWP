@@ -3,6 +3,7 @@ $args = !empty($GLOBALS['rb_adminPage_args']) ? $GLOBALS['rb_adminPage_args'] : 
 $folder = plugin_dir_path(__FILE__) . '../../logs/';
 $files = list_files(rtrim($folder, '/'));
 global $wp_filesystem;
+require_once(ABSPATH . 'wp-admin/includes/file.php');
 WP_Filesystem();
 ?>
 
